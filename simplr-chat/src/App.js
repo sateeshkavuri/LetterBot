@@ -1,15 +1,52 @@
 import React, { useState } from 'react';
 import './App.css'
+import axios from 'axios';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 function App() {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
+  const [editorText, setEditorText] = useState('<p>Hello, this is your text!</p>');
+
+  const handleEditorChange = (value) => {
+    setEditorText(value);
+  };
 
   const handleSend = () => {
     if (message.trim()) {
-      setChatHistory([...chatHistory, message]);
-      setMessage('');
-    }
+      
+        if (message.trim()) {
+         
+          axios.post('https://x7edkhpsp5.execute-api.us-east-1.amazonaws.com/new/modelapi', {
+            promt: message
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+              "Access-Control-Allow-Methods": "POST,OPTIONS",
+              'Access-Control-Allow-Credentials': true,
+            }
+          })
+          .then(response => {
+            const jsonResponse = JSON.parse(response.data.body);
+            let template = message;
+            if (jsonResponse && jsonResponse.content.length > 0){
+              template = jsonResponse.content[0].text;
+            }
+            setChatHistory([...chatHistory, template]);
+            setMessage('');
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        }
+      };
+      
+      
+      
+    
   };
 
   const handleSave = () => {
@@ -21,16 +58,19 @@ function App() {
   };
 
   return (
-    <div className="chat-wrapper">
+    <div >
       
-      <div className="chat-message">
-        <ul>
+      <div className="editor-container">
+        
         {chatHistory.map((message, index) => (
-          <li key={index}>
-            {message}
-          </li>
+         
+          <ReactQuill
+          value={message}
+          onChange={handleEditorChange}
+           theme="snow"
+        />
         ))}
-        </ul>
+        
       </div>
       <div className="form-wrapper">
       <div id="message-form" className="message-form">

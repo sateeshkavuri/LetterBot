@@ -21,6 +21,7 @@ body {
 
 .chat-wrapper {
   height: 100%;
+  width: 100%;
 }
 
 .chat-box {
@@ -140,4 +141,23 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #121214;
   border-radius: 10px;
+}
+
+
+
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+  width: 100%;
+}
+
+.ql-container {
+  flex-grow: 1;
+}
+
+.ql-editor {
+  height: 100%;
+  overflow-y: auto;
 }
