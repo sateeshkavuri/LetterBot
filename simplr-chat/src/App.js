@@ -6,6 +6,7 @@ import 'react-quill/dist/quill.snow.css';
 import myImage from './loading-green-loading.gif'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee } from '@fortawesome/free-solid-svg-icons';
+const AWS = require('aws-sdk');
 
 function App() {
   const [message, setMessage] = useState('');
@@ -43,7 +44,7 @@ function App() {
             if (jsonResponse && jsonResponse.content.length > 0){
               template = jsonResponse.content[0].text;
             }
-            setChatHistory([...chatHistory, "------------\n\n\n"+template]);
+            setChatHistory([...chatHistory, template]);
             setMessage('');
             setLoading(false);
           })
@@ -58,28 +59,46 @@ function App() {
     
   };
 
-  const handleSave = () => {
-    const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'chatHistory.txt';
-    link.click();
+  const handleSaveToS3 = async () => {
+    const s3 = new AWS.S3({
+      accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+      region: process.env.REACT_APP_AWS_REGION,
+    });
+
+    const params = {
+      Bucket: process.env.REACT_APP_S3_BUCKET_NAME,
+      Key: `chatHistory-${Date.now()}.txt`,
+      Body: chatHistory.join('\n'),
+      ContentType: 'text/plain',
+    };
+
+    try {
+      await s3.upload(params).promise();
+      alert('Chat history saved to S3 successfully!');
+    } catch (error) {
+      console.error('Error uploading to S3:', error);
+      alert('Failed to save chat history to S3.');
+    }
   };
+
+
 
   return (
     
     <div >
      
       <div className="editor-container">
-        
+      
         {chatHistory.map((message, index) => (
-         
+          
           <textarea className="message" rows="100" cols="300"         
           onChange={handleEditorChange}           
           >{message}</textarea>
         ))}
         
       </div>
+      
      
       <div className="form-wrapper">
       <div id="message-form" className="message-form">
@@ -91,7 +110,7 @@ function App() {
         <FontAwesomeIcon icon="fa-regular fa-rocket-launch" />
           Send
         </button>
-        <button type="button" className="send" onClick={handleSave}>Save<FontAwesomeIcon icon="fas fa-save" /></button>
+        <button type="button" className="send" onClick={handleSaveToS3}>Save<FontAwesomeIcon icon="fas fa-save" /></button>
         {loading && <img src={myImage} alt="Loading..." className="loading-image" />}
       </div>
         

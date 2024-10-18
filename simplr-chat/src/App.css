@@ -172,3 +172,8 @@ body {
     padding-right: 20px;
     vertical-align: middle; 
 }              
+
+
+.text-area-container {
+  padding-top: 5px;
+}
