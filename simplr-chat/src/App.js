@@ -3,21 +3,29 @@ import './App.css'
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import myImage from './loading-green-loading.gif'; 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [editorText, setEditorText] = useState('<p>Hello, this is your text!</p>');
+  const [loading, setLoading] = useState(false);
+
+  
 
   const handleEditorChange = (value) => {
     setEditorText(value);
   };
 
+  
+
   const handleSend = () => {
     if (message.trim()) {
       
         if (message.trim()) {
-         
+          setLoading(true);
           axios.post('https://x7edkhpsp5.execute-api.us-east-1.amazonaws.com/new/modelapi', {
             promt: message
           }, {
@@ -35,8 +43,9 @@ function App() {
             if (jsonResponse && jsonResponse.content.length > 0){
               template = jsonResponse.content[0].text;
             }
-            setChatHistory([...chatHistory, template]);
+            setChatHistory([...chatHistory, "------------\n\n\n"+template]);
             setMessage('');
+            setLoading(false);
           })
           .catch(error => {
             console.error('Error:', error);
@@ -58,20 +67,20 @@ function App() {
   };
 
   return (
+    
     <div >
-      
+     
       <div className="editor-container">
         
         {chatHistory.map((message, index) => (
          
-          <ReactQuill
-          value={message}
-          onChange={handleEditorChange}
-           theme="snow"
-        />
+          <textarea className="message" rows="100" cols="300"         
+          onChange={handleEditorChange}           
+          >{message}</textarea>
         ))}
         
       </div>
+     
       <div className="form-wrapper">
       <div id="message-form" className="message-form">
         <input type="text" name="message" 
@@ -79,14 +88,17 @@ function App() {
          onChange={(e) => setMessage(e.target.value)}
           placeholder="Send a message..." className="message" id="message" />
         <button type="button" name="send" className="send" onClick={handleSend} >
-         <i class="fas fa-paper-plane"></i>  
+        <FontAwesomeIcon icon="fa-regular fa-rocket-launch" />
           Send
         </button>
-        <button type="button" className="send" onClick={handleSave}>Save</button>
+        <button type="button" className="send" onClick={handleSave}>Save<FontAwesomeIcon icon="fas fa-save" /></button>
+        {loading && <img src={myImage} alt="Loading..." className="loading-image" />}
       </div>
         
       </div>
+      
       </div>
+      
   );
 }
 

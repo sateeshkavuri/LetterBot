@@ -16,7 +16,7 @@ body {
 
 body {
   display: grid;
-  grid-template-columns: 20% auto 20%;
+  grid-template-columns: 90% auto 10%;
 }
 
 .chat-wrapper {
@@ -84,7 +84,7 @@ body {
 .form-wrapper {
   height: 100%;
   position: fixed;
-  width: 60%;
+  width: 90%;
 }
 
 .message-form {
@@ -161,3 +161,14 @@ body {
   height: 100%;
   overflow-y: auto;
 }
+
+
+.fileUploaderBtn {
+    content: "";
+    background: url("https://media.tenor.com/t5DMW5PI8mgAAAAi/loading-green-loading.gif") center no-repeat;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    padding-right: 20px;
+    vertical-align: middle; 
+}              
