@@ -58,7 +58,7 @@ function App() {
   };
 
   return (
-    <div >
+    <div className="root-container" >
       
       <div className="editor-container">
         
