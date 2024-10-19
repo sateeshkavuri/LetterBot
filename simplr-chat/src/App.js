@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import './App.css'
 import axios from 'axios';
 import ReactQuill from 'react-quill';
@@ -13,8 +13,58 @@ function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [editorText, setEditorText] = useState('<p>Hello, this is your text!</p>');
   const [loading, setLoading] = useState(false);
+  const [s3Files, setS3Files] = useState([]);
 
+  const clearChatHistory = () => {
+    setChatHistory([]);
+  };
+
+  const handleFileClick = async (fileName) => {
+    const s3 = new AWS.S3({
+      accessKeyId: 'AKIAQ4J5YEWFCQ3LXGBD',
+      secretAccessKey: '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',
+      region: 'us-east-1',
+    });
+
+    const params = {
+      Bucket: 'discovertrainingdata',
+      Key: fileName,
+    };
+
+    try {
+      clearChatHistory();
+      const data = await s3.getObject(params).promise();
+      const fileContent = data.Body.toString('utf-8');
+      const messages = fileContent;
+      setChatHistory([messages]);
+    } catch (error) {
+      console.error('Error fetching file from S3:', error);
+    }
+  };
+
+  const fetchS3Files = async () => {
+    const s3 = new AWS.S3({
+      accessKeyId: 'AKIAQ4J5YEWFCQ3LXGBD',
+      secretAccessKey: '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',
+      region: 'us-east-1',
+    });
+
+    const params = {
+      Bucket: 'discovertrainingdata',
+    };
+
+    try {
+      setLoading(true);
+      const data = await s3.listObjectsV2(params).promise();
+      const fileNames = data.Contents.map(file => file.Key);
+      setS3Files(fileNames);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching S3 files:', error);
+    }
+  };
   
+ 
 
   const handleEditorChange = (value) => {
     setEditorText(value);
@@ -61,27 +111,34 @@ function App() {
 
   const handleSaveToS3 = async () => {
     const s3 = new AWS.S3({
-      accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
-      region: process.env.REACT_APP_AWS_REGION,
+      accessKeyId: 'AKIAQ4J5YEWFCQ3LXGBD',
+      secretAccessKey: '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',
+      region: 'us-east-1',
     });
 
     const params = {
-      Bucket: process.env.REACT_APP_S3_BUCKET_NAME,
-      Key: `chatHistory-${Date.now()}.txt`,
+      Bucket: 'discovertrainingdata',
+      Key: `template-${Date.now()}.txt`,
       Body: chatHistory.join('\n'),
       ContentType: 'text/plain',
     };
 
     try {
+      setLoading(true);
       await s3.upload(params).promise();
       alert('Chat history saved to S3 successfully!');
+      setLoading(false);
+      fetchS3Files();
     } catch (error) {
       console.error('Error uploading to S3:', error);
       alert('Failed to save chat history to S3.');
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchS3Files();
+  }, []);
 
 
   return (
@@ -111,10 +168,21 @@ function App() {
           Send
         </button>
         <button type="button" className="send" onClick={handleSaveToS3}>Save<FontAwesomeIcon icon="fas fa-save" /></button>
+        <button type="button" className="send" onClick={clearChatHistory}>clean<FontAwesomeIcon icon="fas fa-save" /></button>
         {loading && <img src={myImage} alt="Loading..." className="loading-image" />}
       </div>
-        
+      <div className="s3-files">
+        <h3>Template Files</h3>
+        <ul>
+          {s3Files.map((file, index) => (
+        <li key={index} >
+          <a onClick={() => handleFileClick(file)}>{file}</a><button type="button" className="send" onClick={() => handleFileClick(file)}>Open<FontAwesomeIcon icon="fas fa-save" /></button>
+        </li>
+          ))}
+        </ul>
       </div>
+      </div>
+      
       
       </div>
       
