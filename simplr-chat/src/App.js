@@ -32,11 +32,13 @@ function App() {
     };
 
     try {
+      setLoading(true);
       clearChatHistory();
       const data = await s3.getObject(params).promise();
       const fileContent = data.Body.toString('utf-8');
       const messages = fileContent;
       setChatHistory([messages]);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching file from S3:', error);
     }
