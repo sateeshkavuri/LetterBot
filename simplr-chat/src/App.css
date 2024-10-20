@@ -10,49 +10,160 @@
 html,
 body {
   background-color: #eba23b;
-  color: #1b1818;
+  color: #090909;
   height: 100vh;
 }
 
 body {
-  display: grid;
-  grid-template-columns: 20% auto 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .chat-wrapper {
-  height: 100%;
   width: 100%;
+  height: 100%;
+}
+
+.root-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 80vw; /* Adjust to the desired width */
+  max-width: 1200px;
+  height: 90vh; /* Ensure the chat fits on the page */
+  background-color: #e3e6ec;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #1b1818;
+  border-radius: 10px;
+  padding: 15px;
+  background-color: #fff; /* Background for the chat box */
 }
 
 .chat-box {
-  height: 90%;
-  /* overflow-y: auto;
-  overflow-x: hidden; */
-  padding-right: 8px;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+  background-color: #f4f4f4; /* Light background for chat history */
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  max-height: 70vh; /* Control the height of the chat section */
 }
 
+.chat-box::-webkit-scrollbar {
+  width: 5px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #121214;
+  border-radius: 10px;
+}
 
 .spinner {
   position: absolute;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust for the spinner's size */
-  width: 40px; /* Adjust size as needed */
-  height: 40px; /* Adjust size as needed */
-  border: 4px solid rgba(255, 255, 255, 0.3); /* Background color */
+  /* top: -113px; */
+  bottom: 350px;
+  left: 50%;
+  transform: translateX(-40%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top: 4px solid #3498db; /* Spinner color */
+  border-top: 4px solid #0d1216;
   animation: spin 1s linear infinite;
-  z-index: 10; /* Ensure it appears above the input */
+  z-index: 10;
 }
 
-
-/* Animation for the spinner */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: #40444d;
+  border-radius: 5px;
+  position: relative;
+  margin-top: 20px;
+}
+
+.message-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: #40444d;
+  border-radius: 5px;
+  flex-grow: 2;
+  height: 40px;
+  width: 100%;
+}
+
+.message {
+  height: 30px;
+  padding: 5px;
+  padding-left: 10px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #fff;
+  flex-grow: 2;
+  background-color: transparent;
+}
+
+.send {
+  text-align: center;
+  height: 40px;
+  min-width: 50px;
+  border: none;
+  border-radius: 5px;
+  margin: 0;
+  font-size: 16px;
+  background-color: transparent;
+  color: #fff;
+  opacity: 50%;
+  transition: 0.3s;
+}
+
+.send:hover {
+  cursor: pointer;
+  opacity: 75%;
+}
+
+.editor-container {
+  width: 100%;
+  height: 100%;
+}
+
+.ql-container {
+  flex-grow: 1;
+}
+
+.ql-editor {
+  height: 100%;
+}
+
+/* Chat message styling */
 .chat-message {
   width: 100%;
   padding: 5px;
@@ -102,92 +213,25 @@ body {
   align-items: center;
   margin-bottom: 10px;
 }
-
-.form-wrapper {
-  width: 60%;
-  position: relative;
-  margin-top: 20px;
-}
-
-.message-form {
+.suggestions-list {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  list-style-type: none;
   padding: 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    background-color: #40444d;
-    border-radius: 5px;
-    flex-grow: 2;
-    height: 40px;
-    margin-top:50%;
+  margin-top: 5px;
+  width: 100%;
+  max-height: 100px;
+  overflow-y: auto;
+  z-index: 10;
 }
 
-.message {
-  height: 30px;
+.suggestions-list li {
   padding: 5px;
-  padding-left: 10px;
-  outline: none;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  color: #fff;
-  flex-grow: 2;
-  background-color: transparent;
-}
-
-.send {
-  text-align: center;
-  height: 40px;
-  min-width: 50px;
-  border: none;
-  border-radius: 5px;
-  margin: 0;
-  font-size: 16px;
-  background-color: transparent;
-  color: #fff;
-  opacity: 50%;
-  transition: 0.3s;
-}
-
-.send:hover {
   cursor: pointer;
-  opacity: 75%;
 }
 
-::-webkit-scrollbar {
-  width: 5px;
+.suggestions-list li:hover {
+  background-color: #f0f0f0;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #121214;
-  border-radius: 10px;
-}
-
-
-
-
-.editor-container {
-  width:50%;
-}
-.root-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 80vw;
-  height: 200px;
-  flex-wrap: nowrap;
-  margin-left: 50%;
-}
-
-.ql-container {
-  flex-grow: 1;
-}
-
-.ql-editor {
-  height: 100%;
-  /* overflow-y: auto; */
-}

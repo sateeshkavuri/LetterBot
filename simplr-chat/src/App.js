@@ -6,17 +6,20 @@ import 'react-quill/dist/quill.snow.css';
 
 function App() {
   const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState([]);
-  const [editorText, setEditorText] = useState('<p>Hello, this is your text!</p>');
+  const [displayedMessages, setDisplayedMessages] = useState([]); // Separate state for displayed messages
   const [loading, setLoading] = useState(false); // New loading state
 
-  const handleEditorChange = (value) => {
-    setEditorText(value);
+  const handleEditorChange = (value,index) => {
+    // setEditorText(value);
+    const newDisplayedMessages = displayedMessages;
+    newDisplayedMessages[index] = value;
+    setDisplayedMessages(newDisplayedMessages);
   };
 
   const handleSend = () => {
     if (message.trim()) {
       setLoading(true); // Start spinner
+      setDisplayedMessages([]);
       axios.post('https://x7edkhpsp5.execute-api.us-east-1.amazonaws.com/new/modelapi', {
         promt: message
       }, {
@@ -34,7 +37,7 @@ function App() {
         if (jsonResponse && jsonResponse.content.length > 0) {
           template = jsonResponse.content[0].text;
         }
-        setChatHistory([...chatHistory, template]);
+        setDisplayedMessages([...displayedMessages, template]); // Update displayed messages
         setMessage('');
       })
       .catch(error => {
@@ -46,21 +49,31 @@ function App() {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSend();
+    }
+  };
+
   const handleSave = () => {
-    const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
+    const blob = new Blob([displayedMessages.join('\n')], { type: 'text/plain' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'chatHistory.txt';
+    link.download = 'displayedMessages.txt';
     link.click();
+  };
+
+  const handleClearDisplay = () => {
+    setDisplayedMessages([]); // Clear only the displayed messages
   };
 
   return (
     <div className="root-container">
       <div className="editor-container">
-        {chatHistory.map((message, index) => (
+        {displayedMessages.map((message, index) => (
           <ReactQuill
             value={message}
-            onChange={handleEditorChange}
+            onChange={(value, index) => handleEditorChange(value, index)}
             theme="snow"
             key={index} // Added key to avoid warnings
           />
@@ -74,6 +87,7 @@ function App() {
             name="message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder="Send a message..."
             className="message"
             id="message"
@@ -82,6 +96,7 @@ function App() {
             <i className="fas fa-paper-plane"></i> Send
           </button>
           <button type="button" className="send" onClick={handleSave}>Save</button>
+          <button type="button" className="send" onClick={handleClearDisplay}>Clear</button> {/* Clear display button */}
         </div>
         {loading && <div className="spinner"></div>} {/* Spinner element */}
       </div>
