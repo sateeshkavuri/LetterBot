@@ -9,7 +9,7 @@
 
 html,
 body {
-  background-color: #f69a1d;
+  background-color: #eba23b;
   color: #1b1818;
   height: 100vh;
 }
@@ -29,6 +29,28 @@ body {
   /* overflow-y: auto;
   overflow-x: hidden; */
   padding-right: 8px;
+}
+
+
+.spinner {
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust for the spinner's size */
+  width: 40px; /* Adjust size as needed */
+  height: 40px; /* Adjust size as needed */
+  border: 4px solid rgba(255, 255, 255, 0.3); /* Background color */
+  border-radius: 50%;
+  border-top: 4px solid #3498db; /* Spinner color */
+  animation: spin 1s linear infinite;
+  z-index: 10; /* Ensure it appears above the input */
+}
+
+
+/* Animation for the spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .chat-message {
@@ -83,6 +105,7 @@ body {
 
 .form-wrapper {
   width: 60%;
+  position: relative;
   margin-top: 20px;
 }
 
