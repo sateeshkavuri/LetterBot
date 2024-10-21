@@ -12,7 +12,7 @@ function App() {
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [editorText, setEditorText] = useState('<p>Hello, this is your text!</p>');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [s3Files, setS3Files] = useState([]);
 
   const clearChatHistory = () => {
@@ -102,6 +102,8 @@ function App() {
           })
           .catch(error => {
             console.error('Error:', error);
+            setMessage('');
+            setLoading(false);
           });
         }
       };
@@ -145,7 +147,7 @@ function App() {
 
   return (
     
-    <div >
+    <div className='root-container'>
      
       <div className="editor-container">
       
@@ -157,8 +159,6 @@ function App() {
         ))}
         
       </div>
-      
-     
       <div className="form-wrapper">
       <div id="message-form" className="message-form">
         <input type="text" name="message" 
@@ -166,26 +166,27 @@ function App() {
          onChange={(e) => setMessage(e.target.value)}
           placeholder="Send a message..." className="message" id="message" />
         <button type="button" name="send" className="send" onClick={handleSend} >
-        <FontAwesomeIcon icon="fa-regular fa-rocket-launch" />
+        {/* <FontAwesomeIcon icon="fa-regular fa-rocket-launch" /> */}
           Send
         </button>
         <button type="button" className="send" onClick={handleSaveToS3}>Save<FontAwesomeIcon icon="fas fa-save" /></button>
         <button type="button" className="send" onClick={clearChatHistory}>clean<FontAwesomeIcon icon="fas fa-save" /></button>
-        {loading && <img src={myImage} alt="Loading..." className="loading-image" />}
       </div>
+      {loading && <div className="spinner"></div>}
+      {/* { <div className="spinner"></div>} */}
+
+      </div>
+      
       <div className="s3-files">
         <h3>Template Files</h3>
         <ul>
           {s3Files.map((file, index) => (
         <li key={index} >
-          <a onClick={() => handleFileClick(file)}>{file}</a><button type="button" className="send" onClick={() => handleFileClick(file)}>Open<FontAwesomeIcon icon="fas fa-save" /></button>
+          <a onClick={() => handleFileClick(file)}>{file}</a><button type="button" className="open" onClick={() => handleFileClick(file)}>Open<FontAwesomeIcon icon="fas fa-save" /></button>
         </li>
           ))}
         </ul>
       </div>
-      </div>
-      
-      
       </div>
       
   );
