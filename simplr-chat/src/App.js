@@ -1,10 +1,10 @@
-import React, { useState , useEffect} from 'react';
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import './App.css';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import myImage from './loading-green-loading.gif'; 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 const AWS = require('aws-sdk');
 
@@ -35,12 +35,19 @@ function App() {
       setLoading(true);
       clearChatHistory();
       const data = await s3.getObject(params).promise();
-      const fileContent = data.Body.toString('utf-8');
-      const messages = fileContent;
-      setChatHistory([messages]);
+      let fileContent = data.Body.toString('utf-8');
+      
+      // Convert newlines to <p></p> tags for proper paragraph formatting
+      const formattedContent = fileContent
+        .split('\n')
+        .map(line => `<p>${line}</p>`)
+        .join('');
+
+      setChatHistory([formattedContent]); // Store the formatted content in chatHistory
       setLoading(false);
     } catch (error) {
       console.error('Error fetching file from S3:', error);
+      setLoading(false);
     }
   };
 
@@ -63,54 +70,44 @@ function App() {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching S3 files:', error);
+      setLoading(false);
     }
   };
-  
- 
 
   const handleEditorChange = (value) => {
     setEditorText(value);
   };
 
-  
-
   const handleSend = () => {
     if (message.trim()) {
-      
-        if (message.trim()) {
-          setLoading(true);
-          axios.post('https://x7edkhpsp5.execute-api.us-east-1.amazonaws.com/new/modelapi', {
-            promt: message
-          }, {
-            headers: {
-              'Content-Type': 'application/json',
-              "Access-Control-Allow-Origin": "*",
-              "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-              "Access-Control-Allow-Methods": "POST,OPTIONS",
-              'Access-Control-Allow-Credentials': true,
-            }
-          })
-          .then(response => {
-            const jsonResponse = JSON.parse(response.data.body);
-            let template = message;
-            if (jsonResponse && jsonResponse.content.length > 0){
-              template = jsonResponse.content[0].text;
-            }
-            setChatHistory([...chatHistory, template]);
-            setMessage('');
-            setLoading(false);
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            setMessage('');
-            setLoading(false);
-          });
+      setLoading(true);
+      axios.post('https://x7edkhpsp5.execute-api.us-east-1.amazonaws.com/new/modelapi', {
+        promt: message
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+          "Access-Control-Allow-Methods": "POST,OPTIONS",
+          'Access-Control-Allow-Credentials': true,
         }
-      };
-      
-      
-      
-    
+      })
+      .then(response => {
+        const jsonResponse = JSON.parse(response.data.body);
+        let template = message;
+        if (jsonResponse && jsonResponse.content.length > 0) {
+          template = jsonResponse.content[0].text;
+        }
+        setChatHistory([...chatHistory, template]);
+        setMessage('');
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        setMessage('');
+        setLoading(false);
+      });
+    }
   };
 
   const handleSaveToS3 = async () => {
@@ -144,54 +141,56 @@ function App() {
     fetchS3Files();
   }, []);
 
-
   return (
-    
     <div className='root-container'>
-     
       <div className="editor-container">
-      
         {chatHistory.map((message, index) => (
-          
-          <textarea className="message" rows="100" cols="300"         
-          onChange={handleEditorChange}           
-          >{message}</textarea>
+          <ReactQuill
+            key={index}
+            value={message} // Display the content fetched from S3
+            onChange={handleEditorChange}
+            theme="snow"
+            readOnly={true} // Make ReactQuill read-only to act like a viewer
+          />
         ))}
-        
       </div>
       <div className="form-wrapper">
-      <div id="message-form" className="message-form">
-        <input type="text" name="message" 
-         value={message}
-         onChange={(e) => setMessage(e.target.value)}
-          placeholder="Send a message..." className="message" id="message" />
-        <button type="button" name="send" className="send" onClick={handleSend} >
-        {/* <FontAwesomeIcon icon="fa-regular fa-rocket-launch" /> */}
-          Send
-        </button>
-        <button type="button" className="send" onClick={handleSaveToS3}>Save<FontAwesomeIcon icon="fas fa-save" /></button>
-        <button type="button" className="send" onClick={clearChatHistory}>clean<FontAwesomeIcon icon="fas fa-save" /></button>
+        <div id="message-form" className="message-form">
+          <input 
+            type="text" 
+            name="message" 
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Send a message..." 
+            className="message" 
+            id="message" 
+          />
+          <button type="button" name="send" className="send" onClick={handleSend}>
+            Send
+          </button>
+          <button type="button" className="send" onClick={handleSaveToS3}>Save</button>
+          <button type="button" className="send" onClick={clearChatHistory}>Clear</button>
+        </div>
+        {loading && <div className="spinner"></div>}
       </div>
-      {loading && <div className="spinner"></div>}
-      {/* { <div className="spinner"></div>} */}
-
-      </div>
-      
       <div className="s3-files">
         <h3>Template Files</h3>
         <ul>
           {s3Files.map((file, index) => (
-        <li key={index} >
-          <a onClick={() => handleFileClick(file)}>{file}</a><button type="button" className="open" onClick={() => handleFileClick(file)}>Open<FontAwesomeIcon icon="fas fa-save" /></button>
-        </li>
+            <li key={index}>
+              <a onClick={() => handleFileClick(file)}>{file}</a>
+              <button 
+                type="button" 
+                className="open" 
+                onClick={() => handleFileClick(file)}>
+                Open
+              </button>
+            </li>
           ))}
         </ul>
       </div>
-      </div>
-      
+    </div>
   );
 }
 
 export default App;
-
-
