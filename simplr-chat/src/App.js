@@ -14,17 +14,16 @@ function App() {
   const [editorText, setEditorText] = useState('<p>Hello, this is your text!</p>');
   const [loading, setLoading] = useState(true);
   const [s3Files, setS3Files] = useState([]);
+  const s3 = new AWS.S3({
+   
+  });
 
   const clearChatHistory = () => {
     setChatHistory([]);
   };
 
   const handleFileClick = async (fileName) => {
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIAQ4J5YEWFCQ3LXGBD',
-      secretAccessKey: '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',
-      region: 'us-east-1',
-    });
+    
 
     const params = {
       Bucket: 'discovertrainingdata',
@@ -52,11 +51,7 @@ function App() {
   };
 
   const fetchS3Files = async () => {
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIAQ4J5YEWFCQ3LXGBD',
-      secretAccessKey: '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',
-      region: 'us-east-1',
-    });
+   
 
     const params = {
       Bucket: 'discovertrainingdata',
@@ -111,15 +106,20 @@ function App() {
   };
 
   const handleSaveToS3 = async () => {
-    const s3 = new AWS.S3({
-      accessKeyId: 'AKIAQ4J5YEWFCQ3LXGBD',
-      secretAccessKey: '0BCx4/UCn9whctPSD/k2NiYg5SCHckgwpEMtCjet',
-      region: 'us-east-1',
-    });
+    
+    const name = prompt("Please enter your name:");
+    if (!name) {
+      alert('Name is required to save the chat history.');
+      setLoading(false);
+      return;
+    }
+
+    // Add the name to the beginning of the chat history
+    const chatHistoryWithName = [`Name: ${name}`, ...chatHistory];
 
     const params = {
       Bucket: 'discovertrainingdata',
-      Key: `template-${Date.now()}.txt`,
+      Key: `${name}-${Date.now()}.txt`,
       Body: chatHistory.join('\n'),
       ContentType: 'text/plain',
     };
@@ -150,7 +150,7 @@ function App() {
             value={message} // Display the content fetched from S3
             onChange={handleEditorChange}
             theme="snow"
-            readOnly={true} // Make ReactQuill read-only to act like a viewer
+            readOnly={false} // Make ReactQuill editable
           />
         ))}
       </div>
@@ -175,19 +175,31 @@ function App() {
       </div>
       <div className="s3-files">
         <h3>Template Files</h3>
-        <ul>
-          {s3Files.map((file, index) => (
-            <li key={index}>
-              <a onClick={() => handleFileClick(file)}>{file}</a>
-              <button 
-                type="button" 
-                className="open" 
-                onClick={() => handleFileClick(file)}>
-                Open
-              </button>
-            </li>
-          ))}
-        </ul>
+        <table className="file-table">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {s3Files.map((file, index) => (
+              <tr key={index}>
+                <td>
+                  <a onClick={() => handleFileClick(file)}>{file}</a>
+                </td>
+                <td>
+                  <button 
+                    type="button" 
+                    className="rounded-button" 
+                    onClick={() => handleFileClick(file)}>
+                    Open
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
