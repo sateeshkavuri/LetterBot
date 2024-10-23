@@ -3,9 +3,7 @@ import './App.css';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import myImage from './loading-green-loading.gif'; 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCoffee } from '@fortawesome/free-solid-svg-icons';
+
 const AWS = require('aws-sdk');
 
 function App() {
@@ -18,8 +16,17 @@ function App() {
     
   });
 
+  const toolbarOptions = [
+    [{ 'header': [1, 2, 3, false] }, { 'font': [] }],
+    [{ 'size': [] }],
+    ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['link', 'image', 'video'],
+    ['clean']                                         // remove formatting button
+  ];
+
   const clearChatHistory = () => {
-    setChatHistory([]);
+       setEditorText('');
   };
 
   const handleFileClick = async (fileName) => {
@@ -42,7 +49,10 @@ function App() {
         .map(line => `<p>${line}</p>`)
         .join('');
 
-      setChatHistory([formattedContent]); // Store the formatted content in chatHistory
+      setChatHistory([formattedContent]);
+      setEditorText(formattedContent);
+     
+      // Store the formatted content in chatHistory
       setLoading(false);
     } catch (error) {
       console.error('Error fetching file from S3:', error);
@@ -120,7 +130,7 @@ function App() {
     const params = {
       Bucket: 'discovertrainingdata',
       Key: `${name}-${Date.now()}.txt`,
-      Body: chatHistory.join('\n'),
+      Body: editorText,
       ContentType: 'text/plain',
     };
 
@@ -142,38 +152,11 @@ function App() {
   }, []);
 
   return (
-    <div className='root-container'>
-      <div className="editor-container">
-        {chatHistory.map((message, index) => (
-          <ReactQuill
-            key={index}
-            value={message} // Display the content fetched from S3
-            onChange={handleEditorChange}
-            theme="snow"
-            readOnly={false} // Make ReactQuill editable
-          />
-        ))}
-      </div>
-      <div className="form-wrapper">
-        <div id="message-form" className="message-form">
-          <input 
-            type="text" 
-            name="message" 
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Send a message..." 
-            className="message" 
-            id="message" 
-          />
-          <button type="button" name="send" className="send" onClick={handleSend}>
-            Send
-          </button>
-          <button type="button" className="send" onClick={handleSaveToS3}>Save</button>
-          <button type="button" className="send" onClick={clearChatHistory}>Clear</button>
-        </div>
-        {loading && <div className="spinner"></div>}
-      </div>
-      <div className="s3-files">
+
+    <table>
+      <thead>
+        <tr>
+          <th valign="0px"><div className="editor-container">
         <h3>Template Files</h3>
         <table className="file-table">
           <thead>
@@ -200,8 +183,49 @@ function App() {
             ))}
           </tbody>
         </table>
+      </div></th>
+       <th width="30px"></th>
+          <th><div className='root-container'>
+      <div className="editor-container">
+        {chatHistory.map((message, index) => (
+          <ReactQuill
+          value={editorText} // Display editorText value
+          onChange={handleEditorChange} // Handle editor changes
+          theme="snow"
+          modules={{ toolbar: toolbarOptions }} // Enable text and font options
+        />
+        ))}
       </div>
-    </div>
+      <div className="form-wrapper">
+        <div id="message-form" className="message-form">
+          <input 
+            type="text" 
+            name="message" 
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Send a message..." 
+            className="message" 
+            id="message" 
+          />
+          <button type="button" name="send" className="send" onClick={handleSend}>
+            Send
+          </button>
+          <button type="button" className="send" onClick={handleSaveToS3}>Save</button>
+          <button type="button" className="send" onClick={clearChatHistory}>Clear</button>
+        </div>
+        {loading && <div className="spinner"></div>}
+      </div>
+      </div>
+      
+      </th>
+        </tr>
+      </thead>
+      
+    </table>
+    
+    
+      
+    
   );
 }
 
