@@ -15,8 +15,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [s3Files, setS3Files] = useState([]);
   const s3 = new AWS.S3({
-    accessKeyId: '',
-    secretAccessKey: '',
+    accessKeyId: 'AKIAQ4J5YEWFG3JFURHU',
+    secretAccessKey: '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',
     region: 'us-east-1',
   });
   
