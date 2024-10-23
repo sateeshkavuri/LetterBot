@@ -15,15 +15,29 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [s3Files, setS3Files] = useState([]);
   const s3 = new AWS.S3({
+<<<<<<< HEAD
    
   });
+=======
+    accessKeyId: 'AKIAQ4J5YEWFG3JFURHU',
+    secretAccessKey: '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',
+    region: 'us-east-1',
+  });
+  
+
+  
+>>>>>>> c61a04cb0f0c6d4649df388ccc860abe36f860a3
 
   const clearChatHistory = () => {
     setChatHistory([]);
   };
 
   const handleFileClick = async (fileName) => {
+<<<<<<< HEAD
     
+=======
+  
+>>>>>>> c61a04cb0f0c6d4649df388ccc860abe36f860a3
 
     const params = {
       Bucket: 'discovertrainingdata',
@@ -51,7 +65,11 @@ function App() {
   };
 
   const fetchS3Files = async () => {
+<<<<<<< HEAD
    
+=======
+    
+>>>>>>> c61a04cb0f0c6d4649df388ccc860abe36f860a3
 
     const params = {
       Bucket: 'discovertrainingdata',
