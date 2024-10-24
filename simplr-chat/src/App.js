@@ -156,7 +156,9 @@ function App() {
     <table>
       <thead>
         <tr>
-          <th valign="0px"><div className="editor-container">
+          <th valign="0px">
+            <div className="root-containerX">
+            <div className="editor-containerX">
         <h3>Template Files</h3>
         <table className="file-table">
           <thead>
@@ -183,7 +185,7 @@ function App() {
             ))}
           </tbody>
         </table>
-      </div></th>
+      </div></div></th>
        <th width="30px"></th>
           <th><div className='root-container'>
       <div className="editor-container">
